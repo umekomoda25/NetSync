@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head><title>NetSync Project Report</title></head>
+<body style="font-family: Arial, sans-serif; padding: 40px; background: #f4f4f4;">
+    <div style="max-width: 900px; margin: auto; background: white; padding: 50px; border: 1px solid #ccc; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+        <h1 style="color: #1976d2; text-align: center; border-bottom: 2px solid #1976d2; padding-bottom: 10px;">NETSYNC PROJECT COMPLETION REPORT</h1>
+        
+        <h3>Project Details</h3>
+        <p><strong>Site Name:</strong> {{ project.site_name }}</p>
+        <p><strong>Generation Date:</strong> {{ project.created_at.strftime('%Y-%m-%d') }}</p>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin: 40px 0;">
+            <div style="padding: 25px; background: #e8f5e9; border-radius: 8px;">
+                <h4 style="margin: 0; color: #2e7d32;">Estimated Budget</h4>
+                <h2 style="margin: 10px 0; color: #1b5e20;">₱{{ "{:,.2f}".format(total_est) }}</h2>
+            </div>
+            <div style="padding: 25px; background: #fff3f3; border-radius: 8px; border: 1px solid #ffcdd2;">
+                <h4 style="margin: 0; color: #c62828;">AI Forecast (With Waste)</h4>
+                <h2 style="margin: 10px 0; color: #b71c1c;">₱{{ "{:,.2f}".format(total_ai) }}</h2>
+            </div>
+        </div>
+
+        <h3>Material Breakdown</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+            <thead>
+                <tr style="background: #eee;">
+                    <th style="padding: 10px; border: 1px solid #ddd;">Material</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">Planned Qty</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">AI Suggested</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">AI Total Cost</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for mat in project.materials %}
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ddd;">{{ mat.item_name }}</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">{{ mat.quantity_estimated }} {{ mat.unit }}</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">{{ "%.2f"|format(mat.ai_prediction) }} {{ mat.unit }}</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">₱{{ "{:,.2f}".format(mat.ai_prediction * mat.unit_price) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div style="margin-top: 50px;">
+            <button onclick="window.print()" style="padding: 10px 20px; background: #1976d2; color: white; border: none; cursor: pointer;">Download PDF Report</button>
+            <a href="{{ url_for('dashboard') }}" style="margin-left: 20px; color: #666;">Return to NetSync Dashboard</a>
+        </div>
+    </div>
+</body>
+</html>

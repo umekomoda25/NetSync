@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head><title>NetSync Evaluation</title></head>
+<body style="font-family: sans-serif; padding: 20px;">
+    <h1>Material Planning: {{ project.site_name }}</h1>
+    <a href="{{ url_for('dashboard') }}">« Dashboard</a>
+    <hr>
+    <div style="display: flex; gap: 40px;">
+        <div style="flex: 1;">
+            <h3>Survey Reference</h3>
+            <img src="{{ url_for('static', filename='uploads/' + project.photo_filename) }}" width="100%" style="border-radius: 8px; border: 1px solid #ddd;">
+        </div>
+        <div style="flex: 1;">
+            <h3>Add Project Requirements</h3>
+            <form action="{{ url_for('add_material', project_id=project.id) }}" method="POST">
+                <input type="text" name="item_name" placeholder="Item (e.g., Fiber Optic Cable)" style="width: 100%; padding: 8px;" required><br><br>
+                <input type="number" step="0.1" name="quantity" placeholder="Qty" style="width: 45%; padding: 8px;" required>
+                <input type="text" name="unit" placeholder="Unit (m/pcs)" style="width: 45%; padding: 8px;" required><br><br>
+                <input type="number" step="0.01" name="unit_price" placeholder="Price per Unit (₱)" style="width: 100%; padding: 8px;" required><br><br>
+                <button type="submit" style="width: 100%; padding: 10px; background: #1976d2; color: white; border: none; cursor: pointer;">Add Material & Run AI</button>
+            </form>
+            <hr>
+            <h3>Planned Materials</h3>
+            {% for mat in project.materials %}
+            <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-left: 5px solid #1976d2; background: #fefefe;">
+                <strong>{{ mat.item_name }}</strong><br>
+                Estimate: {{ mat.quantity_estimated }} {{ mat.unit }} @ ₱{{ "{:,.2f}".format(mat.unit_price) }}<br>
+                <span style="color: #d32f2f; font-weight: bold;">🤖 AI Forecast: {{ "%.2f"|format(mat.ai_prediction) }} {{ mat.unit }}</span><br>
+                <span>Predicted Cost: <strong>₱{{ "{:,.2f}".format(mat.ai_prediction * mat.unit_price) }}</strong></span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

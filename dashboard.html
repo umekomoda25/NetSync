@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NetSync Dashboard</title>
+    <style>
+        body { font-family: sans-serif; margin: 30px; background-color: #f8f9fa; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #1976d2; color: white; }
+        .status-badge { padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 0.85em; }
+        .surveying { background: #e3f2fd; color: #1976d2; }
+        .evaluating { background: #fff3e0; color: #ef6c00; }
+        .implementation { background: #e8f5e9; color: #2e7d32; }
+        .btn { padding: 8px 15px; cursor: pointer; border-radius: 4px; border: none; background: #1976d2; color: white; text-decoration: none; display: inline-block; }
+    </style>
+</head>
+<body>
+    <h1>NetSync Project Dashboard</h1>
+    <a href="{{ url_for('survey') }}" class="btn">+ New NetSync Survey</a>
+    <hr>
+    <table>
+        <thead>
+            <tr>
+                <th>Site Name</th>
+                <th>Status</th>
+                <th>Survey Photo</th>
+                <th>Management Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for project in projects %}
+            <tr>
+                <td><strong>{{ project.site_name }}</strong></td>
+                <td><span class="status-badge {{ project.status.lower() }}">{{ project.status }}</span></td>
+                <td><img src="{{ url_for('static', filename='uploads/' + project.photo_filename) }}" width="70" style="border-radius: 4px;"></td>
+                <td>
+                    <a href="{{ url_for('evaluate', project_id=project.id) }}">Plan Materials</a> | 
+                    <a href="{{ url_for('implement', project_id=project.id) }}">Daily Logs</a> | 
+                    <a href="{{ url_for('report', project_id=project.id) }}" style="color: green; font-weight: bold;">Report</a> |
+                    <form action="{{ url_for('delete_project', project_id=project.id) }}" method="POST" style="display:inline;">
+                        <button type="submit" onclick="return confirm('Delete site data?')" style="color: red; background: none; border: none; cursor: pointer; text-decoration: underline; padding: 0;">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

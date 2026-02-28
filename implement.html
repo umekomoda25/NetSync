@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head><title>NetSync Field Logs</title></head>
+<body style="font-family: sans-serif; padding: 20px;">
+    <h1>Implementation Progress: {{ project.site_name }}</h1>
+    <a href="{{ url_for('dashboard') }}">« Dashboard</a>
+    <hr>
+    <form action="{{ url_for('add_log', project_id=project.id) }}" method="POST" enctype="multipart/form-data">
+        <label>Daily Activity Log:</label><br>
+        <textarea name="description" placeholder="Describe today's progress..." style="width: 100%; height: 100px; padding: 10px;" required></textarea><br><br>
+        <label>Attach Site Photo (EOD):</label><br>
+        <input type="file" name="log_photo"><br><br>
+        <button type="submit" style="padding: 10px 20px; background: #2e7d32; color: white; border: none; cursor: pointer;">Post Daily Log</button>
+    </form>
+    <hr>
+    <h3>Field Activity History</h3>
+    {% for log in project.logs %}
+    <div style="border-bottom: 1px solid #eee; padding: 20px 0;">
+        <p><small>{{ log.created_at.strftime('%B %d, %Y - %H:%M') }}</small></p>
+        <p>{{ log.description }}</p>
+        {% if log.log_photo %}
+            <img src="{{ url_for('static', filename='uploads/' + log.log_photo) }}" width="250" style="border-radius: 4px;">
+        {% endif %}
+    </div>
+    {% endfor %}
+</body>
+</html>

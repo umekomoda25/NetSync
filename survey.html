@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head><title>NetSync Survey Form</title></head>
+<body style="font-family: sans-serif; padding: 40px;">
+    <h1>NetSync Survey Form</h1>
+    <a href="{{ url_for('dashboard') }}">« Back to Dashboard</a>
+    <hr>
+    <form action="/create-project" method="POST" enctype="multipart/form-data">
+        <label>Site Name / Location:</label><br>
+        <input type="text" name="site_name" style="width: 300px; padding: 8px;" required><br><br>
+        <label>Upload Site Survey Photo:</label><br>
+        <input type="file" name="site_photo" required><br><br>
+        <button type="submit" style="padding: 10px 20px; background: #1976d2; color: white; border: none; cursor: pointer;">Submit NetSync Survey</button>
+    </form>
+</body>
+</html>
