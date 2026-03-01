@@ -22,6 +22,7 @@ db = SQLAlchemy(app)
 class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     site_name = db.Column(db.String(100), nullable=False)
+    location = db.Column(db.String(200)) # Added for wireframe compliance
     status = db.Column(db.String(20), default='Surveying')
     photo_filename = db.Column(db.String(200))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -35,7 +36,7 @@ class Material(db.Model):
     quantity_estimated = db.Column(db.Float)
     ai_prediction = db.Column(db.Float)
     unit = db.Column(db.String(20))
-    unit_price = db.Column(db.Float, default=0.0)
+    unit_price = db.Column(db.Float, default=0.0) # Added for budget tracking
 
 class TaskLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -59,8 +60,34 @@ def predict_material_need(estimated_qty):
 
 @app.route('/')
 def dashboard():
-    all_projects = Project.query.order_by(Project.created_at.desc()).all()
-    return render_template('dashboard.html', projects=all_projects)
+    search_query = request.args.get('search', '')
+    
+    # Calculate Stats for wireframe banner
+    active_count = Project.query.filter(Project.status != 'Completed').count()
+    completed_count = Project.query.filter_by(status='Completed').count()
+    
+    # Search filter
+    if search_query:
+        projects = Project.query.filter(
+            (Project.site_name.ilike(f'%{search_query}%')) | 
+            (Project.location.ilike(f'%{search_query}%'))
+        ).order_by(Project.created_at.desc()).all()
+    else:
+        projects = Project.query.order_by(Project.created_at.desc()).all()
+        
+    return render_template('dashboard.html', 
+                           projects=projects, 
+                           search_query=search_query,
+                           active_count=active_count,
+                           completed_count=completed_count)
+
+@app.route('/complete-project/<int:project_id>', methods=['POST'])
+def complete_project(project_id):
+    project = Project.query.get_or_404(project_id)
+    # Toggle logic for completion status
+    project.status = 'Completed' if project.status != 'Completed' else 'Implementation'
+    db.session.commit()
+    return redirect(url_for('dashboard'))
 
 @app.route('/survey')
 def survey():
@@ -69,11 +96,12 @@ def survey():
 @app.route('/create-project', methods=['POST'])
 def create_project():
     site_name = request.form.get('site_name')
+    location = request.form.get('location') # Captured from survey
     file = request.files.get('site_photo')
     if file and site_name:
         filename = secure_filename(file.filename)
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        new_project = Project(site_name=site_name, photo_filename=filename)
+        new_project = Project(site_name=site_name, location=location, photo_filename=filename)
         db.session.add(new_project)
         db.session.commit()
     return redirect(url_for('dashboard'))
@@ -99,7 +127,8 @@ def add_material(project_id):
                        quantity_estimated=qty, ai_prediction=prediction, 
                        unit=request.form.get('unit'), unit_price=u_price)
     project = Project.query.get(project_id)
-    project.status = 'Evaluating'
+    if project.status != 'Completed':
+        project.status = 'Evaluating'
     db.session.add(new_mat)
     db.session.commit()
     return redirect(url_for('evaluate', project_id=project_id))
@@ -118,7 +147,8 @@ def add_log(project_id):
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     new_log = TaskLog(project_id=project_id, description=desc, log_photo=filename)
     project = Project.query.get(project_id)
-    project.status = 'Implementation'
+    if project.status != 'Completed':
+        project.status = 'Implementation'
     db.session.add(new_log)
     db.session.commit()
     return redirect(url_for('implement', project_id=project_id))
@@ -128,7 +158,11 @@ def report(project_id):
     project = Project.query.get_or_404(project_id)
     total_est = sum(m.quantity_estimated * m.unit_price for m in project.materials)
     total_ai = sum(m.ai_prediction * m.unit_price for m in project.materials)
-    return render_template('report.html', project=project, total_est=total_est, total_ai=total_ai)
+    return render_template('report.html', 
+                           project=project, 
+                           total_est=total_est, 
+                           total_ai=total_ai, 
+                           now=datetime.utcnow()) # Added datetime for report header
 
 if __name__ == '__main__':
     app.run(debug=True)
