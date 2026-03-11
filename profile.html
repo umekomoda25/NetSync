@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Profile</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; }
+        .header { background-color: #0a0b1e; color: white; padding: 10px 50px; }
+        .container { padding: 50px; max-width: 600px; margin: 0 auto; }
+        .profile-card { background: white; padding: 30px; border-radius: 15px; border: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <div class="header"><h1>NetSync</h1></div>
+    <div class="container">
+        <div class="profile-card">
+            <h2>User Profile</h2>
+            <p><strong>Username:</strong> {{ user.username }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <hr>
+            <a href="/" style="color: #2176ff;">Dashboard</a> | 
+            <a href="/logout" style="color: red;">Logout</a>
+        </div>
+    </div>
+</body>
+</html>

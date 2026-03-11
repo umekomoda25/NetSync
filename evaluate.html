@@ -10,15 +10,16 @@
         .system-logo { height: 45px; border-radius: 5px; }
         .container { padding: 30px 8%; }
         .back-link { text-decoration: none; color: #5d87ff; font-weight: bold; float: right; }
-        .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px; }
+        .main-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 30px; margin-top: 20px; }
         .card { background: white; padding: 25px; border-radius: 12px; border: 1px solid #eee; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-        h3 { margin-top: 0; border-bottom: 2px solid #f4f7f6; padding-bottom: 10px; margin-bottom: 20px; }
-        label { display: block; font-weight: bold; margin-bottom: 8px; font-size: 14px; }
-        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; background: #fcfcfc; }
-        .row { display: flex; gap: 15px; }
-        .btn-ai { width: 100%; padding: 15px; background: #5d87ff; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .material-item { border: 1px solid #eee; border-radius: 12px; padding: 20px; margin-bottom: 15px; border-left: 6px solid #5d87ff; background: white; }
-        .ai-badge { color: #d32f2f; font-weight: bold; display: flex; align-items: center; gap: 5px; margin-top: 5px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .btn-ai { width: 100%; padding: 15px; background: #5d87ff; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-ai:hover { background: #4a6fdc; }
+        .material-item { background: white; padding: 20px; border-radius: 10px; border: 1px solid #eee; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .ai-badge { background: #ecf2ff; color: #5d87ff; padding: 5px 12px; border-radius: 6px; font-size: 13px; font-weight: bold; display: inline-block; margin-top: 8px; }
+        .btn-remove { background: none; border: none; color: #ff4d4d; cursor: pointer; font-weight: bold; font-size: 14px; }
+        .btn-remove:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -28,40 +29,61 @@
             <div style="font-size: 24px; font-weight: bold;">NetSync</div>
         </a>
     </div>
+
     <div class="container">
-        <a href="/" class="back-link">Back to Dashboard</a>
-        <h1>Plan Material</h1>
-        <p style="color: #666;"><i class="fas fa-map-marker-alt"></i> {{ project.location }}</p>
+        <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> Dashboard</a>
+        <h1>Site Planning: {{ project.site_name }}</h1>
+
         <div class="main-grid">
             <div class="card">
-                <h3>Survey Photo</h3>
-                <img src="{{ url_for('static', filename='uploads/' + project.photo_filename) }}" style="width: 100%; border-radius: 10px;">
-            </div>
-            <div class="card">
-                <h3>Add Requirements</h3>
+                <h3>Add Materials or Tools</h3>
                 <form action="/add-material/{{ project.id }}" method="POST">
-                    <label>Item Name</label>
-                    <input type="text" name="item_name" placeholder="e.g. Fiber Cable" required>
-                    <div class="row">
-                        <div style="flex: 1;"><label>Quantity</label><input type="number" step="0.1" name="quantity" required></div>
-                        <div style="flex: 1;"><label>Unit</label><input type="text" name="unit" placeholder="Meters" required></div>
+                    <label>Item Description</label>
+                    <input type="text" name="item_name" placeholder="e.g. Crimping Tool, Cat6 Cable, Screwdriver" required>
+                    
+                    <div style="display:flex; gap:10px;">
+                        <div style="flex:1;">
+                            <label>Quantity</label>
+                            <input type="number" step="0.1" name="quantity" required>
+                        </div>
+                        <div style="flex:1;">
+                            <label>Unit</label>
+                            <input type="text" name="unit" placeholder="Pcs / Meters" required>
+                        </div>
                     </div>
+                    
                     <label>Unit Price (₱)</label>
                     <input type="number" step="0.01" name="unit_price" required>
-                    <button type="submit" class="btn-ai">Add Materials & Run AI</button>
+                    
+                    <button type="submit" class="btn-ai">
+                        <i class="fas fa-microchip"></i> Add to Site Plan
+                    </button>
                 </form>
             </div>
-        </div>
-        <div style="margin-top: 40px;">
-            <h3>Planned Materials</h3>
-            {% for mat in project.materials %}
-            <div class="material-item">
-                <div style="font-size: 18px; font-weight: bold;">{{ mat.item_name }}</div>
-                <div style="color: #666;">Estimate: {{ mat.quantity_estimated }} {{ mat.unit }} @ ₱{{ "{:,.2f}".format(mat.unit_price) }}</div>
-                <div class="ai-badge"><i class="fas fa-wand-magic-sparkles"></i> AI Forecast: {{ "%.2f"|format(mat.ai_prediction) }} {{ mat.unit }}</div>
+
+            <div class="card">
+                <h3>Planned Inventory</h3>
+                {% if project.materials %}
+                    {% for mat in project.materials %}
+                    <div class="material-item">
+                        <div style="flex-grow: 1;">
+                            <div style="font-weight: bold; font-size: 16px;">{{ mat.item_name }}</div>
+                            <div style="font-size: 13px; color: #666; margin-top: 4px;">
+                                Planned: {{ mat.quantity_estimated }} {{ mat.unit }} | ₱{{ "{:,.2f}".format(mat.unit_price) }}
+                            </div>
+                            <div class="ai-badge">
+                                <i class="fas fa-robot"></i> AI Recommended: {{ "%.2f"|format(mat.ai_prediction) }} {{ mat.unit }}
+                            </div>
+                        </div>
+                        <form action="{{ url_for('delete_material', material_id=mat.id) }}" method="POST">
+                            <button type="submit" class="btn-remove" onclick="return confirm('Remove this item?')">
+                                <i class="fas fa-times-circle"></i> Remove
+                            </button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="text-align:center; color:#999; margin-top: 50px;">No items added yet.</p>
+                {% endif %}
             </div>
-            {% endfor %}
         </div>
-    </div>
-</body>
-</html>
