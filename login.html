@@ -1,23 +1,126 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NetSync Login</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0a0b1e; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: white; padding: 40px; border-radius: 15px; width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #5d87ff; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        body {
+            background-color: #0d0e12;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-wrapper {
+            position: relative;
+            padding: 2px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #7b2cbf, #3a0ca3);
+            box-shadow: 0 0 20px rgba(123, 44, 191, 0.4);
+        }
+        .card {
+            background-color: #14151a;
+            padding: 40px;
+            border-radius: 14px;
+            width: 350px;
+            text-align: center;
+        }
+        .card h2 {
+            margin-top: 0;
+            margin-bottom: 5px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .card p {
+            color: #8b8d98;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            color: #8b8d98;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            background-color: #1c1d24;
+            border: 1px solid #2d2e36;
+            color: white;
+            border-radius: 8px;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            border-color: #7b2cbf;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #7b2cbf, #3a0ca3);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            transition: opacity 0.3s;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .flash-messages {
+            color: #ff4d4d;
+            font-size: 14px;
+            margin-bottom: 15px;
+            background: rgba(255, 77, 77, 0.1);
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 77, 77, 0.3);
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h2 style="margin-top:0;">NetSync Login</h2>
-        <form method="POST">
-            <input type="text" name="username" placeholder="Username" required>
-            <input type="password" name="password" placeholder="Password" required>
-            <button type="submit">Login</button>
-        </form>
-        <p style="font-size:14px; margin-top:20px;">No account? <a href="/register" style="color:#5d87ff;">Register here</a></p>
+    <div class="login-wrapper">
+        <div class="card">
+            <h2>Log In</h2>
+            <p>NetSync Project Management</p>
+            
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <div class="flash-messages">
+                  {% for message in messages %}
+                    {{ message }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
+
+            <form method="POST">
+                <div class="input-group">
+                    <label>Username</label>
+                    <input type="text" name="username" placeholder="Enter your username" required>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" name="password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
     </div>
 </body>
 </html>

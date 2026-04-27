@@ -3,23 +3,17 @@
 <head>
     <title>User Profile</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; }
-        .header { background-color: #0a0b1e; color: white; padding: 10px 50px; }
-        .container { padding: 50px; max-width: 600px; margin: 0 auto; }
-        .profile-card { background: white; padding: 30px; border-radius: 15px; border: 1px solid #eee; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 40px; border-radius: 15px; width: 350px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
-    <div class="header"><h1>NetSync</h1></div>
-    <div class="container">
-        <div class="profile-card">
-            <h2>User Profile</h2>
-            <p><strong>Username:</strong> {{ user.username }}</p>
-            <p><strong>Email:</strong> {{ user.email }}</p>
-            <hr>
-            <a href="/" style="color: #2176ff;">Dashboard</a> | 
-            <a href="/logout" style="color: red;">Logout</a>
-        </div>
+    <div class="card">
+        <h2>My Profile</h2>
+        <p><strong>Username:</strong> {{ current_user.username }}</p>
+        <p><strong>Role:</strong> {{ current_user.role|capitalize }}</p>
+        <hr>
+        <a href="/" style="color: #5d87ff; text-decoration: none;">Back to Dashboard</a>
     </div>
 </body>
 </html>

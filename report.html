@@ -5,62 +5,22 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #f9f9f9; margin: 0; padding: 40px; }
-        
-        /* Header Navigation */
         .header { background-color: #0a0b1e; color: white; padding: 10px 50px; display: flex; align-items: center; position: fixed; top: 0; left: 0; right: 0; z-index: 1000; }
         .brand-container { display: flex; align-items: center; gap: 15px; text-decoration: none; color: white; }
         .system-logo { height: 45px; border-radius: 5px; }
-        .logo { font-size: 24px; font-weight: bold; }
-
         .report-paper { background: white; max-width: 900px; margin: 80px auto 0; padding: 50px; border: 1px solid #eee; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
-        
-        .report-header { text-align: center; border-bottom: 3px solid #0a0b1e; padding-bottom: 20px; margin-bottom: 30px; }
-        .report-header h1 { color: #0a0b1e; margin: 0; text-transform: uppercase; letter-spacing: 2px; }
-        
-        .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 40px; }
-        .meta-item { font-size: 15px; color: #444; }
-        
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 40px; }
-        .stat-box { padding: 25px; border-radius: 12px; text-align: center; }
-        .box-est { background: #e8f5e9; color: #2e7d32; }
-        .box-ai { background: #ffebee; color: #c62828; }
-        .stat-label { font-size: 14px; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; display: block; }
-        .stat-value { font-size: 28px; font-weight: bold; }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { background: #f4f7f6; padding: 15px; text-align: left; border-bottom: 2px solid #ddd; }
-        td { padding: 15px; border-bottom: 1px solid #eee; }
-
-        /* Action Buttons */
-        .no-print { margin-top: 40px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 15px; }
-        .btn-download { 
-            background: #5d87ff; 
-            color: white; 
-            padding: 15px 30px; 
-            border-radius: 8px; 
-            text-decoration: none; 
-            font-weight: bold; 
-            border: none; 
-            cursor: pointer;
-            font-size: 16px;
-        }
-        .btn-back {
-            color: #666;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .btn-back:hover { color: #000; }
-
-        /* PDF Printing Logic */
-        @media print {
-            .header, .no-print { display: none; }
-            body { background: white; padding: 0; }
-            .report-paper { margin: 0; border: none; box-shadow: none; width: 100%; max-width: none; }
-        }
+        .report-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 30px; }
+        .status-stamp { display: inline-block; padding: 10px 20px; border: 3px solid #000; font-weight: bold; text-transform: uppercase; transform: rotate(-5deg); margin: 20px 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 30px; }
+        th { background: #f4f4f4; text-align: left; padding: 12px; border-bottom: 2px solid #ddd; }
+        td { padding: 12px; border-bottom: 1px solid #eee; }
+        .summary-stats { display: flex; justify-content: flex-end; gap: 40px; margin-top: 30px; }
+        .stat-box { text-align: right; }
+        .stat-label { font-size: 14px; color: #666; display: block; }
+        .stat-value { font-size: 20px; font-weight: bold; }
+        .btn-download { background: #000; color: white; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; text-decoration: none; margin-right: 10px; }
+        .btn-back { background: #fff; border: 1px solid #ddd; padding: 12px 25px; border-radius: 8px; text-decoration: none; color: #333; font-weight: bold; }
+        @media print { .no-print, .header { display: none; } .report-paper { margin: 0; border: none; box-shadow: none; width: 100%; } }
     </style>
 </head>
 <body>
@@ -68,30 +28,40 @@
     <div class="header">
         <a href="/" class="brand-container">
             <img src="{{ url_for('static', filename='uploads/icons/netsync.jpg') }}" class="system-logo">
-            <div class="logo">NetSync</div>
+            <div style="font-size: 24px; font-weight: bold;">NetSync</div>
         </a>
     </div>
 
     <div class="report-paper">
         <div class="report-header">
-            <h1>Project Completion Report</h1>
+            <h1 style="margin:0;">SITE PROJECT REPORT</h1>
+            <p style="color:#666;">Generated on {{ now.strftime('%B %d, %Y') }}</p>
         </div>
 
-        <div class="meta-grid">
-            <div class="meta-item">
-                <strong>Project Details</strong><br>
-                Site Name: {{ project.site_name }}<br>
-                Location: {{ project.location }}
+        <div style="display: flex; justify-content: space-between;">
+            <div>
+                <h3>Site Details</h3>
+                <p><strong>Name:</strong> {{ project.site_name }}</p>
+                <p><strong>Location:</strong> {{ project.location }}</p>
+                <p><strong>Floor Area:</strong> {{ project.floor_area or 'N/A' }}</p>
+                <p><strong>Started:</strong> {{ project.created_at.strftime('%m/%d/%Y') }}</p>
+                {% if project.description %}
+                    <p><strong>Description:</strong> {{ project.description }}</p>
+                {% endif %}
             </div>
-            <div class="meta-item" style="text-align: right;">
-                <strong>Generation Date</strong><br>
-                {{ now.strftime('%Y-%m-%d') }}
+            <div style="text-align: right;">
+                <div class="status-stamp">{{ project.status }}</div>
+                <form action="{{ url_for('complete_project', project_id=project.id) }}" method="POST" class="no-print">
+                    <button type="submit" style="background:none; border:none; color:#5d87ff; cursor:pointer; font-weight:bold;">
+                        {% if project.status == 'Completed' %}Mark as Active{% else %}Mark as Completed{% endif %}
+                    </button>
+                </form>
             </div>
         </div>
 
-        <div class="stats-grid">
-            <div class="stat-box box-est">
-                <span class="stat-label">Estimated Budget</span>
+        <div class="summary-stats">
+            <div class="stat-box">
+                <span class="stat-label">Estimated Cost</span>
                 <span class="stat-value">₱{{ "{:,.2f}".format(total_est) }}</span>
             </div>
             <div class="stat-box box-ai">
@@ -122,9 +92,9 @@
             </tbody>
         </table>
 
-        <div class="no-print">
+        <div class="no-print" style="margin-top: 50px;">
             <button onclick="window.print()" class="btn-download">
-                <i class="fas fa-download"></i> Download PDF Report
+                <i class="fas fa-print"></i> Print Report
             </button>
             <a href="/" class="btn-back">
                 <i class="fas fa-arrow-left"></i> Return to Dashboard

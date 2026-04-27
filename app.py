@@ -37,8 +37,11 @@ class Project(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     site_name = db.Column(db.String(100), nullable=False)
     location = db.Column(db.String(200))
-    status = db.Column(db.String(20), default='Surveying')
+    description = db.Column(db.Text)
+    status = db.Column(db.String(20), default='Created')
     photo_filename = db.Column(db.String(200))
+    floor_area = db.Column(db.String(100))
+    survey_note = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     materials = db.relationship('Material', backref='project', lazy=True, cascade="all, delete-orphan")
     logs = db.relationship('TaskLog', backref='project', lazy=True, cascade="all, delete-orphan")
@@ -65,30 +68,23 @@ def load_user(user_id):
 
 # --- UNIVERSAL AI FORECAST ---
 def run_ai_forecast(qty):
-    """Predicts required inventory with a 12% safety margin for tools and materials."""
     X = np.array([[1], [10], [50], [100], [500]])
     y = np.array([1.12, 11.2, 56.0, 112.0, 560.0]) 
     model = LinearRegression().fit(X, y)
     return float(model.predict([[qty]])[0])
 
 # --- AUTH ROUTES ---
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        hashed = generate_password_hash(request.form.get('password'))
-        user = User(username=request.form.get('username'), email=request.form.get('email'), password_hash=hashed)
-        db.session.add(user)
-        db.session.commit()
-        return redirect(url_for('login'))
-    return render_template('register.html')
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+        
     if request.method == 'POST':
         user = User.query.filter_by(username=request.form.get('username')).first()
         if user and check_password_hash(user.password_hash, request.form.get('password')):
             login_user(user)
             return redirect(url_for('dashboard'))
+        flash('Invalid username or password')
     return render_template('login.html')
 
 @app.route('/logout')
@@ -98,32 +94,61 @@ def logout():
 
 # --- PROJECT MANAGEMENT ---
 @app.route('/')
+def index():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    return redirect(url_for('dashboard'))
+
+@app.route('/dashboard')
 @login_required
 def dashboard():
-    projects = Project.query.filter_by(user_id=current_user.id).order_by(Project.created_at.desc()).all()
-    active = Project.query.filter(Project.user_id==current_user.id, Project.status != 'Completed').count()
-    done = Project.query.filter_by(user_id=current_user.id, status='Completed').count()
-    return render_template('dashboard.html', projects=projects, active_count=active, completed_count=done)
+    user_projects = Project.query.filter_by(user_id=current_user.id).order_by(Project.created_at.desc()).all()
+    active = Project.query.filter(Project.user_id == current_user.id, Project.status != 'Completed').count()
+    done = Project.query.filter(Project.user_id == current_user.id, Project.status == 'Completed').count()
+    return render_template('dashboard.html', projects=user_projects, active_count=active, completed_count=done)
 
-@app.route('/survey')
+@app.route('/create')
 @login_required
-def survey():
-    return render_template('survey.html')
+def create():
+    return render_template('create.html')
 
 @app.route('/create-project', methods=['POST'])
 @login_required
 def create_project():
-    file = request.files.get('site_photo')
-    if file:
-        fname = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], fname))
-        project = Project(site_name=request.form.get('site_name'), location=request.form.get('location'), 
-                          photo_filename=fname, user_id=current_user.id)
-        db.session.add(project)
-        db.session.commit()
+    project = Project(
+        site_name=request.form.get('site_name'), 
+        location=request.form.get('location'), 
+        description=request.form.get('description'),
+        status='Created',
+        user_id=current_user.id
+    )
+    db.session.add(project)
+    db.session.commit()
     return redirect(url_for('dashboard'))
 
-# --- MATERIAL & TOOL PLANNING ---
+@app.route('/survey/<int:project_id>', methods=['GET', 'POST'])
+@login_required
+def survey_project(project_id):
+    project = Project.query.get_or_404(project_id)
+    if project.user_id != current_user.id:
+        return "Unauthorized Access", 403
+        
+    if request.method == 'POST':
+        project.floor_area = request.form.get('floor_area')
+        project.survey_note = request.form.get('survey_note')
+        project.status = 'Surveying'
+        
+        file = request.files.get('site_photo')
+        if file and file.filename != '':
+            fname = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], fname))
+            project.photo_filename = fname
+            
+        db.session.commit()
+        return redirect(url_for('dashboard'))
+        
+    return render_template('survey.html', project=project)
+
 @app.route('/evaluate/<int:project_id>')
 @login_required
 def evaluate(project_id):
@@ -141,7 +166,7 @@ def add_material(project_id):
                    quantity_estimated=qty, ai_prediction=run_ai_forecast(qty),
                    unit=request.form.get('unit'), unit_price=float(request.form.get('unit_price', 0)))
     
-    if project.status == 'Surveying':
+    if project.status in ['Created', 'Surveying']:
         project.status = 'Evaluating'
         
     db.session.add(mat)
@@ -158,7 +183,6 @@ def delete_material(material_id):
         db.session.commit()
     return redirect(url_for('evaluate', project_id=project_id))
 
-# --- LOGS & REPORTS ---
 @app.route('/implement/<int:project_id>')
 @login_required
 def implement(project_id):
@@ -199,15 +223,6 @@ def complete_project(project_id):
     project = Project.query.get_or_404(project_id)
     project.status = 'Completed' if project.status != 'Completed' else 'Implementation'
     db.session.commit()
-    return redirect(url_for('dashboard'))
-
-@app.route('/delete-project/<int:project_id>', methods=['POST'])
-@login_required
-def delete_project(project_id):
-    project = Project.query.get_or_404(project_id)
-    if project.user_id == current_user.id:
-        db.session.delete(project)
-        db.session.commit()
     return redirect(url_for('dashboard'))
 
 if __name__ == '__main__':
