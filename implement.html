@@ -4,65 +4,136 @@
     <title>NetSync - Daily Logs</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f9f9f9; margin: 0; }
-        .header { background-color: #0a0b1e; color: white; padding: 10px 50px; display: flex; align-items: center; justify-content: space-between; }
-        .brand-container { display: flex; align-items: center; gap: 15px; text-decoration: none; color: white; }
-        .system-logo { height: 45px; border-radius: 5px; }
-        .container { padding: 30px 15%; }
-        .back-link { text-decoration: none; color: #5d87ff; font-weight: bold; float: right; margin-bottom: 20px; }
-        .log-card { background: white; padding: 30px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 40px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        textarea { width: 100%; height: 120px; padding: 15px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 15px; box-sizing: border-box; }
-        .btn-post { background: #000; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .timeline { border-left: 3px solid #eee; padding-left: 30px; margin-left: 10px; }
-        .entry { position: relative; margin-bottom: 40px; background: white; padding: 20px; border-radius: 10px; border: 1px solid #eee; }
-        .dot { position: absolute; left: -42px; top: 20px; width: 20px; height: 20px; background: #5d87ff; border-radius: 50%; border: 4px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
-        .meta { color: #888; font-size: 13px; margin-bottom: 10px; }
-        .log-img { max-width: 100%; border-radius: 8px; margin-top: 15px; border: 1px solid #eee; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0d0e12; color: #ffffff; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        .sidebar { width: 260px; background-color: #14151a; border-right: 1px solid #2d2e36; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; flex-shrink: 0; }
+        .brand { display: flex; align-items: center; gap: 15px; font-size: 20px; font-weight: bold; margin-bottom: 40px; color: #fff; text-decoration: none; }
+        .brand-icon { width: 35px; height: 35px; background: linear-gradient(135deg, #7b2cbf, #3a0ca3); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+        .nav-menu { list-style: none; padding: 0; margin: 0; flex-grow: 1; }
+        .nav-item { margin-bottom: 6px; }
+        .nav-link { display: flex; align-items: center; gap: 15px; padding: 12px 15px; color: #8b8d98; text-decoration: none; border-radius: 8px; font-size: 15px; transition: all 0.3s ease; }
+        .nav-link:hover { background-color: #1c1d24; color: #fff; }
+        .nav-link.active { background: linear-gradient(135deg, #7b2cbf, #3a0ca3); color: #fff; font-weight: 500; }
+        .logout-wrapper { margin-top: auto; }
+
+        .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        .top-header { height: 70px; border-bottom: 1px solid #2d2e36; display: flex; justify-content: space-between; align-items: center; padding: 0 40px; background-color: #14151a; flex-shrink: 0; }
+        .page-title { font-size: 18px; font-weight: 600; margin: 0; }
+        .user-profile { display: flex; align-items: center; gap: 12px; }
+        .avatar { width: 36px; height: 36px; background-color: #2d2e36; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #7b2cbf; }
+
+        .container { padding: 30px 40px; }
+        .top-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .log-card { background: #14151a; padding: 28px; border-radius: 12px; border: 1px solid #2d2e36; margin-bottom: 40px; }
+        .log-card h3 { color: #ffffff; margin-top: 0; }
+        textarea, input[type="text"] { width: 100%; padding: 14px; border-radius: 8px; border: 1px solid #2d2e36; background-color: #1c1d24; color: #ffffff; margin-bottom: 14px; box-sizing: border-box; font-family: inherit; }
+        textarea { height: 120px; }
+        textarea::placeholder, input[type="text"]::placeholder { color: #8b8d98; }
+        textarea:focus, input[type="text"]:focus { outline: none; border-color: #7b2cbf; }
+        input[type="file"] { color: #8b8d98; }
+        label { color: #8b8d98; font-size: 13px; }
+        .btn-post { background: linear-gradient(135deg, #7b2cbf, #3a0ca3); color: white; border: none; padding: 12px 28px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: opacity 0.3s; font-size: 14px; }
+        .btn-post:hover { opacity: 0.9; }
+        .btn-complete { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+        .btn-back { text-decoration: none; color: #7b2cbf; font-weight: bold; transition: color 0.3s; font-size: 14px; }
+        .btn-back:hover { color: #3a0ca3; }
+        .timeline { border-left: 3px solid #2d2e36; padding-left: 30px; margin-left: 10px; }
+        .entry { position: relative; margin-bottom: 40px; background: #14151a; padding: 20px; border-radius: 10px; border: 1px solid #2d2e36; }
+        .dot { position: absolute; left: -42px; top: 20px; width: 20px; height: 20px; background: #7b2cbf; border-radius: 50%; border: 4px solid #0d0e12; }
+        .meta { color: #8b8d98; font-size: 13px; margin-bottom: 10px; }
+        .meta strong { color: #ffffff; }
+        .entry-text { color: #e0e0e0; line-height: 1.6; }
+        .materials-box { margin-top: 14px; padding: 12px; background: rgba(123,44,191,0.1); border-left: 3px solid #7b2cbf; border-radius: 4px; font-size: 14px; color: #e0e0e0; }
+        .log-img-wrapper { margin-top: 15px; display: flex; justify-content: center; background: #1c1d24; border-radius: 8px; border: 1px solid #2d2e36; overflow: hidden; width: 100%; height: 400px; }
+        .log-img { width: 400px; height: 400px; object-fit: cover; display: block; flex-shrink: 0; }
+        h1 { color: #ffffff; margin: 0; font-size: 20px; }
     </style>
 </head>
 <body>
-
-    <div class="header">
-        <a href="/" class="brand-container">
-            <img src="{{ url_for('static', filename='uploads/icons/netsync.jpg') }}" class="system-logo">
-            <div style="font-size: 24px; font-weight: bold;">NetSync</div>
+    <div class="sidebar">
+        <a href="/" class="brand">
+            <div class="brand-icon"><i class="fas fa-network-wired"></i></div>
+            NetSync
         </a>
-    </div>
-
-    <div class="container">
-        <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
-        <h1>Implementation Journal: {{ project.site_name }}</h1>
-        
-        <div class="log-card">
-            <h3>New Field Update</h3>
-            <form action="{{ url_for('add_log', project_id=project.id) }}" method="POST" enctype="multipart/form-data">
-                <textarea name="description" placeholder="Describe today's activities, challenges, or milestones..." required></textarea>
-                <label style="font-weight:bold; color:#444;">Attach Progress Photo (Optional):</label><br>
-                <input type="file" name="log_photo" style="margin-top:10px;"><br><br>
-                <button type="submit" class="btn-post"><i class="fas fa-paper-plane"></i> Post Daily Log</button>
-            </form>
-        </div>
-
-        <div class="timeline">
-            {% if project.logs %}
-                {% for log in project.logs|sort(attribute='created_at', reverse=True) %}
-                <div class="entry">
-                    <div class="dot"></div>
-                    <div class="meta">
-                        <strong><i class="fas fa-user-hard-hat"></i> Field Update</strong> • 
-                        {{ log.created_at.strftime('%B %d, %Y - %I:%M %p') }}
-                    </div>
-                    <div style="line-height: 1.6; color: #333;">{{ log.description }}</div>
-                    {% if log.log_photo %}
-                        <img src="{{ url_for('static', filename='uploads/' + log.log_photo) }}" class="log-img">
-                    {% endif %}
-                </div>
-                {% endfor %}
-            {% else %}
-                <p style="color: #888; font-style: italic;">No logs have been posted yet for this site.</p>
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="/" class="nav-link"><i class="fas fa-th-large"></i> Dashboard</a></li>
+            {% if current_user.can_manage_projects() %}
+            <li class="nav-item"><a href="/create-project" class="nav-link"><i class="fas fa-plus-square"></i> New Project</a></li>
             {% endif %}
+            <li class="nav-item"><a href="{{ url_for('inventory') }}" class="nav-link"><i class="fas fa-boxes"></i> Materials</a></li>
+            {% if current_user.can_manage_users() %}
+            <li class="nav-item"><a href="{{ url_for('add_users') }}" class="nav-link"><i class="fas fa-users-cog"></i> Users</a></li>
+            {% endif %}
+        </ul>
+        <div class="logout-wrapper">
+            <a href="/logout" class="nav-link" style="color:#ff4d4d;"><i class="fas fa-sign-out-alt"></i> Log Out</a>
         </div>
     </div>
 
+    <div class="main-content">
+        <div class="top-header">
+            <h1 class="page-title">Implementation Journal: {{ project.site_name }}</h1>
+            <div class="user-profile">
+                <span style="font-size:14px; color:#8b8d98;">{{ current_user.username }}</span>
+                <div class="avatar">{{ current_user.username[0]|upper }}</div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="top-actions">
+                <div style="display:flex; gap:12px; align-items:center;">
+                    {% if current_user.can_mark_complete() %}
+                    <form action="{{ url_for('complete_project', project_id=project.id) }}" method="POST" style="margin:0;">
+                        <button type="submit" class="btn-post btn-complete">
+                            {% if project.status == 'Completed' %}
+                                <i class="fas fa-undo"></i> Reopen Project
+                            {% else %}
+                                <i class="fas fa-check-circle"></i> Mark as Completed
+                            {% endif %}
+                        </button>
+                    </form>
+                    {% endif %}
+                    <a href="/" class="btn-back"><i class="fas fa-arrow-left"></i> Dashboard</a>
+                </div>
+            </div>
+
+            <div class="log-card">
+                <h3><i class="fas fa-plus-circle" style="color:#7b2cbf; margin-right:8px;"></i>New Field Update</h3>
+                <form action="{{ url_for('add_log', project_id=project.id) }}" method="POST" enctype="multipart/form-data">
+                    <textarea name="description" placeholder="Describe today's activities, challenges, or milestones..." required></textarea>
+                    <input type="text" name="materials_used" placeholder="Materials used today (e.g. 15m Cat6 cable, 4 RJ45 connectors)...">
+                    <label style="display:block; margin-top:4px; margin-bottom:8px;"><strong>Attach Progress Photo (Optional):</strong></label>
+                    <input type="file" name="log_photo" style="margin-bottom:18px;"><br>
+                    <button type="submit" class="btn-post"><i class="fas fa-paper-plane"></i> Post Daily Log</button>
+                </form>
+            </div>
+
+            <div class="timeline">
+                {% if project.logs %}
+                    {% for log in project.logs|sort(attribute='created_at', reverse=True) %}
+                    <div class="entry">
+                        <div class="dot"></div>
+                        <div class="meta">
+                            <strong><i class="fas fa-hard-hat"></i> Field Update</strong> &bull;
+                            {{ log.created_at.strftime('%B %d, %Y - %I:%M %p') }}
+                        </div>
+                        <div class="entry-text">{{ log.description }}</div>
+                        {% if log.materials_used %}
+                        <div class="materials-box">
+                            <strong style="color:#b366ff;"><i class="fas fa-tools"></i> Materials Used:</strong> {{ log.materials_used }}
+                        </div>
+                        {% endif %}
+                        {% if log.log_photo %}
+                        <div class="log-img-wrapper">
+                            <img src="{{ url_for('static', filename='uploads/' + log.log_photo) }}" class="log-img" alt="Progress Photo">
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color:#8b8d98; font-style:italic;">No logs have been posted yet for this site.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 </body>
 </html>

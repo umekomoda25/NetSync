@@ -1,110 +1,605 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>NetSync Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NetSync - Material Evaluation</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #f4f7f6; }
-        .header { background-color: #0a0b1e; color: white; padding: 10px 50px; display: flex; align-items: center; justify-content: space-between; }
-        .brand-container { display: flex; align-items: center; gap: 15px; text-decoration: none; color: white; }
-        .system-logo { height: 45px; border-radius: 5px; }
-        .container { padding: 30px 8%; }
-        .stats-row { display: flex; gap: 20px; margin-bottom: 30px; }
-        .stat-card { flex: 1; background: white; padding: 20px; border-radius: 12px; border: 1px solid #eee; display: flex; align-items: center; gap: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .stat-icon { font-size: 30px; color: #5d87ff; background: #ecf2ff; padding: 15px; border-radius: 10px; }
-        .project-card { background: white; border-radius: 12px; border: 1px solid #eee; padding: 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 25px; transition: 0.3s; }
-        .project-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-        .site-thumb { width: 120px; height: 120px; object-fit: cover; border-radius: 10px; background: #eee; display: flex; align-items: center; justify-content: center; }
-        .project-info { flex-grow: 1; }
-        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
-        .created { background: #e2e3e5; color: #383d41; }
-        .surveying { background: #fff3cd; color: #856404; }
-        .evaluating { background: #cce5ff; color: #004085; }
-        .implementation { background: #d4edda; color: #155724; }
-        .completed { background: #e2e3e5; color: #383d41; }
-        .actions { display: flex; gap: 10px; }
-        .btn-action { text-decoration: none; padding: 8px 15px; border-radius: 6px; font-size: 13px; font-weight: bold; background: #f0f0f0; color: #444; border: 1px solid #ddd; }
-        .btn-primary { background: #5d87ff; color: white; border: none; }
-        .new-btn { background: #000; color: white; padding: 12px 25px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 10px; }
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background-color: #0d0e12;
+            color: #ffffff;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background-color: #14151a;
+            border-right: 1px solid #2d2e36;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            flex-shrink: 0;
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 40px;
+            color: #fff;
+            text-decoration: none;
+        }
+        .brand-icon {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, #7b2cbf, #3a0ca3);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .nav-menu { list-style: none; padding: 0; margin: 0; flex-grow: 1; }
+        .nav-item { margin-bottom: 10px; }
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 15px;
+            color: #8b8d98;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover { background-color: #1c1d24; color: #fff; }
+        .logout-wrapper { margin-top: auto; }
+
+        /* Main Content */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            background-color: #0d0e12;
+        }
+
+        /* Header */
+        .top-header {
+            height: 70px;
+            border-bottom: 1px solid #2d2e36;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            background-color: #14151a;
+            flex-shrink: 0;
+        }
+        .page-title { font-size: 20px; font-weight: 600; margin: 0; }
+        .user-profile { display: flex; align-items: center; gap: 15px; }
+        .avatar {
+            width: 36px; height: 36px;
+            background-color: #2d2e36;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; color: #7b2cbf;
+        }
+
+        /* Container */
+        .container { padding: 30px 40px; }
+
+        /* Project info bar */
+        .project-bar {
+            background: #14151a;
+            border: 1px solid #2d2e36;
+            border-radius: 12px;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+        .project-thumb {
+            width: 72px; height: 72px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #1c1d24;
+            border: 1px solid #2d2e36;
+            display: flex; align-items: center; justify-content: center;
+            color: #8b8d98; font-size: 22px;
+            flex-shrink: 0;
+        }
+        .project-bar-info h2 { margin: 0 0 4px; font-size: 17px; }
+        .project-bar-info p { margin: 0; color: #8b8d98; font-size: 13px; }
+        .status-badge {
+            margin-left: auto;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .evaluated { background: rgba(52, 152, 219, 0.12); color: #3498db; border: 1px solid rgba(52, 152, 219, 0.3); }
+        .surveyed { background: rgba(243, 156, 18, 0.12); color: #f39c12; border: 1px solid rgba(243, 156, 18, 0.3); }
+        .planning { background: rgba(149, 165, 166, 0.12); color: #95a5a6; border: 1px solid rgba(149, 165, 166, 0.3); }
+        .implementation { background: rgba(155, 89, 182, 0.12); color: #9b59b6; border: 1px solid rgba(155, 89, 182, 0.3); }
+        .completed { background: rgba(46, 204, 113, 0.12); color: #2ecc71; border: 1px solid rgba(46, 204, 113, 0.3); }
+
+        /* Add Material Panel */
+        .add-panel {
+            background: #14151a;
+            border: 1px solid #2d2e36;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .add-panel h3 {
+            margin: 0 0 18px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .add-panel h3 i { color: #7b2cbf; }
+
+        /* Search dropdown */
+        .search-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 220px;
+        }
+        .search-input {
+            width: 100%;
+            padding: 11px 14px 11px 36px;
+            background: #0d0e12;
+            border: 1px solid #2d2e36;
+            color: #fff;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .search-input:focus { border-color: #7b2cbf; }
+        .search-input::placeholder { color: #8b8d98; }
+        .search-icon {
+            position: absolute;
+            left: 11px; top: 50%;
+            transform: translateY(-50%);
+            color: #8b8d98;
+            font-size: 13px;
+            pointer-events: none;
+        }
+        .dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0; right: 0;
+            background: #1c1d24;
+            border: 1px solid #3a3b45;
+            border-radius: 8px;
+            z-index: 50;
+            max-height: 280px;
+            overflow-y: auto;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+        .dropdown.visible { display: block; }
+        .dropdown-group-label {
+            padding: 8px 14px 4px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #7b2cbf;
+            background: #1c1d24;
+            position: sticky;
+            top: 0;
+        }
+        .dropdown-item {
+            padding: 10px 14px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #d0d0d0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.15s;
+        }
+        .dropdown-item:hover { background: #2d2e36; color: #fff; }
+        .dropdown-item .item-price {
+            color: #b366ff;
+            font-weight: 600;
+            white-space: nowrap;
+            font-size: 12px;
+        }
+        .dropdown-empty {
+            padding: 20px 14px;
+            text-align: center;
+            color: #8b8d98;
+            font-size: 13px;
+        }
+
+        /* Form row */
+        .form-row {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+        .form-field { display: flex; flex-direction: column; gap: 6px; }
+        .form-field label { font-size: 12px; color: #8b8d98; font-weight: 500; }
+        .form-input {
+            padding: 11px 14px;
+            background: #0d0e12;
+            border: 1px solid #2d2e36;
+            color: #fff;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .form-input:focus { border-color: #7b2cbf; }
+        .form-input[readonly] { color: #b366ff; border-color: rgba(123, 44, 191, 0.3); background: rgba(123, 44, 191, 0.05); }
+        .qty-input { width: 100px; }
+        .price-display { width: 160px; }
+        .btn-add {
+            padding: 11px 22px;
+            background: linear-gradient(135deg, #7b2cbf, #3a0ca3);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+        }
+        .btn-add:hover { opacity: 0.9; }
+
+        /* Selected item info */
+        .selected-item-tag {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: rgba(123, 44, 191, 0.1);
+            border: 1px solid rgba(123, 44, 191, 0.3);
+            border-radius: 8px;
+            font-size: 13px;
+            color: #d0d0d0;
+            margin-bottom: 14px;
+        }
+        .selected-item-tag.visible { display: flex; }
+        .selected-item-tag .tag-name { font-weight: 600; color: #fff; }
+        .selected-item-tag .tag-clear {
+            margin-left: auto;
+            cursor: pointer;
+            color: #8b8d98;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .selected-item-tag .tag-clear:hover { color: #ff4d4d; background: rgba(255,77,77,0.1); }
+
+        /* Materials Table */
+        .table-panel {
+            background: #14151a;
+            border: 1px solid #2d2e36;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .table-panel-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid #2d2e36;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .table-panel-header h3 { margin: 0; font-size: 15px; font-weight: 600; color: #e0e0e0; }
+        .mat-count {
+            background: rgba(123, 44, 191, 0.12);
+            color: #b366ff;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid rgba(123, 44, 191, 0.25);
+        }
+        table { width: 100%; border-collapse: collapse; }
+        thead tr { background: #1c1d24; }
+        th {
+            padding: 12px 18px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #8b8d98;
+            border-bottom: 1px solid #2d2e36;
+        }
+        td {
+            padding: 14px 18px;
+            font-size: 14px;
+            color: #e0e0e0;
+            border-bottom: 1px solid #1c1d24;
+        }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: rgba(255,255,255,0.02); }
+        .td-ai { color: #7b2cbf; font-weight: 700; }
+        .td-price { color: #d0d0d0; }
+        .btn-delete {
+            background: none;
+            border: none;
+            color: #8b8d98;
+            cursor: pointer;
+            font-size: 15px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .btn-delete:hover { color: #ff4d4d; background: rgba(255,77,77,0.1); }
+        .empty-row td {
+            text-align: center;
+            padding: 40px;
+            color: #8b8d98;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
-
-    <div class="header">
-        <a href="/" class="brand-container">
-            <img src="{{ url_for('static', filename='uploads/icons/netsync.jpg') }}" class="system-logo">
-            <div style="font-size: 24px; font-weight: bold;">NetSync</div>
+    <div class="sidebar">
+        <a href="/" class="brand">
+            <div class="brand-icon"><i class="fas fa-network-wired"></i></div>
+            NetSync
         </a>
-        <div style="display: flex; align-items: center; gap: 20px;">
-            <span>Welcome, <strong>{{ current_user.username }}</strong></span>
-            <a href="/logout" style="color: #ff5e5e; text-decoration: none; font-weight: bold;">Logout</a>
+                <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="/" class="nav-link"><i class="fas fa-th-large"></i> Dashboard</a>
+            </li>
+            {% if current_user.can_manage_projects() %}
+            <li class="nav-item">
+                <a href="/create-project" class="nav-link"><i class="fas fa-plus-square"></i> New Project</a>
+            </li>
+            {% endif %}
+            <li class="nav-item">
+                <a href="{{ url_for('inventory') }}" class="nav-link"><i class="fas fa-boxes"></i> Materials</a>
+            </li>
+            {% if current_user.can_manage_users() %}
+            <li class="nav-item">
+                <a href="{{ url_for('add_users') }}" class="nav-link"><i class="fas fa-users-cog"></i> Users</a>
+            </li>
+            {% endif %}
+        </ul>
+        <div class="logout-wrapper">
+            <a href="/logout" class="nav-link" style="color: #ff4d4d;"><i class="fas fa-sign-out-alt"></i> Log Out</a>
         </div>
     </div>
 
-    <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-            <h1 style="margin: 0;">Material Evaluation: {{ project.site_name }}</h1>
-            <a href="/" class="btn-action"><i class="fas fa-arrow-left"></i> Return Home</a>
-        </div>
-
-        <div class="project-card">
-            {% if project.photo_filename %}
-                <img src="{{ url_for('static', filename='uploads/' + project.photo_filename) }}" class="site-thumb">
-            {% else %}
-                <div class="site-thumb"><i class="fas fa-image"></i></div>
-            {% endif %}
-            <div class="project-info">
-                <h2 style="margin: 0 0 5px 0;">{{ project.site_name }}</h2>
-                <p style="color: #666; margin: 0;"><i class="fas fa-map-marker-alt"></i> {{ project.location }}</p>
-                <p style="color: #888; font-size: 14px; margin-top: 5px;">Floor Area: {{ project.floor_area or 'N/A' }}</p>
-                <div style="margin-top: 10px;">
-                    <span class="status-badge {{ project.status.lower() }}">{{ project.status }}</span>
-                </div>
+    <div class="main-content">
+        <div class="top-header">
+            <h1 class="page-title">Material Evaluation</h1>
+            <div class="user-profile">
+                <span style="font-size: 14px; color: #8b8d98;">{{ current_user.username }}</span>
+                <div class="avatar">{{ current_user.username[0]|upper }}</div>
             </div>
         </div>
 
-        <div style="background: white; padding: 25px; border-radius: 12px; border: 1px solid #eee;">
-            <h3>Material Inventory List</h3>
-            <form action="{{ url_for('add_material', project_id=project.id) }}" method="POST" style="margin-bottom: 20px;">
-                <input type="text" name="item_name" placeholder="Item Name" required style="padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
-                <input type="number" step="0.01" name="quantity" placeholder="Qty" required style="padding: 10px; border-radius: 5px; border: 1px solid #ddd; width: 80px;">
-                <input type="text" name="unit" placeholder="Unit (e.g. meters)" required style="padding: 10px; border-radius: 5px; border: 1px solid #ddd; width: 120px;">
-                <input type="number" step="0.01" name="unit_price" placeholder="Price per Unit (₱)" required style="padding: 10px; border-radius: 5px; border: 1px solid #ddd; width: 140px;">
-                <button type="submit" class="btn-primary" style="padding: 11px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">Add Material</button>
-            </form>
+        <div class="container">
 
-            <table style="width: 100%; border-collapse: collapse; text-align: left;">
-                <thead>
-                    <tr style="background: #f8f9fa; border-bottom: 2px solid #eee;">
-                        <th style="padding: 12px;">Item Name</th>
-                        <th style="padding: 12px;">Your Estimated Qty</th>
-                        <th style="padding: 12px;">AI Predicted Qty</th>
-                        <th style="padding: 12px;">Unit Price</th>
-                        <th style="padding: 12px;">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for mat in project.materials %}
-                    <tr style="border-bottom: 1px solid #eee;">
-                        <td style="padding: 12px;">{{ mat.item_name }}</td>
-                        <td style="padding: 12px;">{{ mat.quantity_estimated }} {{ mat.unit }}</td>
-                        <td style="padding: 12px; color: #5d87ff; font-weight: bold;">{{ "%.2f"|format(mat.ai_prediction) }} {{ mat.unit }}</td>
-                        <td style="padding: 12px;">₱{{ "{:,.2f}".format(mat.unit_price) }}</td>
-                        <td style="padding: 12px;">
-                            <form action="{{ url_for('delete_material', material_id=mat.id) }}" method="POST">
-                                <button type="submit" style="background: none; border: none; color: #ff5e5e; cursor: pointer;"><i class="fas fa-times-circle"></i></button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="5" style="padding: 20px; text-align: center; color: #888;">No materials logged yet.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <!-- Project Info Bar -->
+            <div class="project-bar">
+                {% if project.photo_filename %}
+                    <img src="{{ url_for('static', filename='uploads/' + project.photo_filename) }}" class="project-thumb" alt="Site Photo">
+                {% else %}
+                    <div class="project-thumb"><i class="fas fa-image"></i></div>
+                {% endif %}
+                <div class="project-bar-info">
+                    <h2>{{ project.site_name }}</h2>
+                    <p><i class="fas fa-map-marker-alt"></i> {{ project.location }}
+                    {% if project.floor_area %} &nbsp;·&nbsp; <i class="fas fa-ruler-combined"></i> {{ project.floor_area }}{% endif %}</p>
+                </div>
+                <span class="status-badge {{ project.status.lower() }}">{{ project.status }}</span>
+                <a href="/" style="text-decoration:none; margin-left:12px; padding:8px 16px; border-radius:8px; background:#1c1d24; color:#8b8d98; font-size:13px; border:1px solid #2d2e36; transition:all 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#8b8d98'">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+            </div>
+
+            <!-- Add Material Panel -->
+            <div class="add-panel">
+                <h3><i class="fas fa-plus-circle"></i> Add Material</h3>
+
+                <div id="selectedTag" class="selected-item-tag">
+                    <i class="fas fa-tag" style="color:#7b2cbf;"></i>
+                    <span class="tag-name" id="tagName"></span>
+                    <span id="tagDesc" style="color:#8b8d98; font-size:12px;"></span>
+                    <span class="tag-clear" onclick="clearSelection()"><i class="fas fa-times"></i></span>
+                </div>
+
+                <form action="{{ url_for('evaluate', project_id=project.id) }}" method="POST" id="addForm">
+                    <input type="hidden" name="item_name" id="hiddenItemName">
+                    <input type="hidden" name="unit_price" id="hiddenUnitPrice">
+                    <input type="hidden" name="unit" value="unit">
+
+                    <div class="form-row">
+                        <div class="form-field" style="flex:1; min-width:220px;">
+                            <label>Search Item</label>
+                            <div class="search-wrapper">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" class="search-input" id="itemSearch" placeholder="Search materials..." autocomplete="off" oninput="filterItems()" onfocus="showDropdown()" onblur="delayHide()">
+                                <div class="dropdown" id="itemDropdown"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-field">
+                            <label>Quantity</label>
+                            <input type="number" name="quantity" id="qtyInput" class="form-input qty-input" placeholder="0" step="0.01" min="0" required>
+                        </div>
+
+                        <div class="form-field">
+                            <label>Unit Price (₱)</label>
+                            <input type="text" id="priceDisplay" class="form-input price-display" readonly placeholder="Select item first">
+                        </div>
+
+                        <button type="submit" class="btn-add" id="addBtn" disabled>
+                            <i class="fas fa-plus"></i> Add Material
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Materials Table -->
+            <div class="table-panel">
+                <div class="table-panel-header">
+                    <h3><i class="fas fa-list" style="color:#7b2cbf; margin-right:8px;"></i>Material Inventory</h3>
+                    <span class="mat-count">{{ project.materials|length }} item{% if project.materials|length != 1 %}s{% endif %}</span>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Est. Qty</th>
+                            <th>AI Predicted Qty</th>
+                            <th>Unit Price</th>
+                            <th>Est. Cost</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for mat in project.materials %}
+                        <tr>
+                            <td>{{ mat.item_name }}</td>
+                            <td>{{ mat.quantity_estimated }}</td>
+                            <td class="td-ai">{{ "%.2f"|format(mat.ai_prediction) }}</td>
+                            <td class="td-price">₱{{ "{:,.2f}".format(mat.unit_price) }}</td>
+                            <td>₱{{ "{:,.2f}".format(mat.ai_prediction * mat.unit_price) }}</td>
+                            <td>
+                                <form action="{{ url_for('delete_material', material_id=mat.id) }}" method="POST" style="margin:0;">
+                                    <button type="submit" class="btn-delete" title="Remove"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr class="empty-row">
+                            <td colspan="6">No materials added yet. Use the form above to add items.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
         </div>
     </div>
 
+    <script>
+        // ── Catalogue: loaded dynamically from global inventory ────────
+        let CATALOGUE = [];
+        let selectedItem = null;
+
+        async function loadCatalogue() {
+            try {
+                const r = await fetch('/api/inventory');
+                const items = await r.json();
+                // Group by category
+                const groups = {};
+                items.forEach(i => {
+                    if (!groups[i.category]) groups[i.category] = [];
+                    groups[i.category].push({ name: i.item_name, price: i.unit_price, desc: i.description || i.unit_label });
+                });
+                CATALOGUE = Object.entries(groups).map(([group, its]) => ({ group, items: its }));
+            } catch(e) {
+                console.error('Could not load inventory', e);
+            }
+        }
+        loadCatalogue();
+
+        function renderDropdown(filter) {
+            const dd = document.getElementById('itemDropdown');
+            dd.innerHTML = '';
+            let any = false;
+            CATALOGUE.forEach(group => {
+                const filtered = group.items.filter(i =>
+                    !filter || i.name.toLowerCase().includes(filter.toLowerCase()) || i.desc.toLowerCase().includes(filter.toLowerCase())
+                );
+                if (filtered.length === 0) return;
+                any = true;
+                const lbl = document.createElement('div');
+                lbl.className = 'dropdown-group-label';
+                lbl.textContent = group.group;
+                dd.appendChild(lbl);
+                filtered.forEach(item => {
+                    const el = document.createElement('div');
+                    el.className = 'dropdown-item';
+                    el.innerHTML = `<span>${item.name} <small style="color:#8b8d98;">— ${item.desc}</small></span><span class="item-price">₱${item.price.toLocaleString('en-PH')}</span>`;
+                    el.addEventListener('mousedown', () => selectItem(item));
+                    dd.appendChild(el);
+                });
+            });
+            if (!any) {
+                dd.innerHTML = '<div class="dropdown-empty">No matching items found.</div>';
+            }
+        }
+
+        function showDropdown() {
+            renderDropdown(document.getElementById('itemSearch').value);
+            document.getElementById('itemDropdown').classList.add('visible');
+        }
+
+        function filterItems() {
+            renderDropdown(document.getElementById('itemSearch').value);
+            document.getElementById('itemDropdown').classList.add('visible');
+        }
+
+        let hideTimer;
+        function delayHide() {
+            hideTimer = setTimeout(() => {
+                document.getElementById('itemDropdown').classList.remove('visible');
+            }, 200);
+        }
+
+        function selectItem(item) {
+            clearTimeout(hideTimer);
+            selectedItem = item;
+            document.getElementById('itemSearch').value = item.name;
+            document.getElementById('hiddenItemName').value = item.name;
+            document.getElementById('hiddenUnitPrice').value = item.price;
+            document.getElementById('priceDisplay').value = '₱' + item.price.toLocaleString('en-PH', {minimumFractionDigits: 2});
+            document.getElementById('tagName').textContent = item.name;
+            document.getElementById('tagDesc').textContent = item.desc;
+            document.getElementById('selectedTag').classList.add('visible');
+            document.getElementById('addBtn').disabled = false;
+            document.getElementById('itemDropdown').classList.remove('visible');
+            document.getElementById('qtyInput').focus();
+        }
+
+        function clearSelection() {
+            selectedItem = null;
+            document.getElementById('itemSearch').value = '';
+            document.getElementById('hiddenItemName').value = '';
+            document.getElementById('hiddenUnitPrice').value = '';
+            document.getElementById('priceDisplay').value = '';
+            document.getElementById('selectedTag').classList.remove('visible');
+            document.getElementById('addBtn').disabled = true;
+        }
+
+        document.getElementById('addForm').addEventListener('submit', function(e) {
+            if (!document.getElementById('hiddenItemName').value) {
+                e.preventDefault();
+                alert('Please select an item from the dropdown first.');
+            }
+        });
+    </script>
 </body>
 </html>

@@ -6,4 +6,3 @@ flask_login
 werkzeug
 scikit-learn
 numpy
-requests

@@ -219,13 +219,23 @@
             <div class="brand-icon"><i class="fas fa-network-wired"></i></div>
             NetSync
         </a>
-        <ul class="nav-menu">
+                <ul class="nav-menu">
             <li class="nav-item">
                 <a href="/" class="nav-link"><i class="fas fa-th-large"></i> Dashboard</a>
             </li>
+            {% if current_user.can_manage_projects() %}
             <li class="nav-item">
-                <a href="/create" class="nav-link active"><i class="fas fa-plus-square"></i> New Project</a>
+                <a href="/create-project" class="nav-link"><i class="fas fa-plus-square"></i> New Project</a>
             </li>
+            {% endif %}
+            <li class="nav-item">
+                <a href="{{ url_for('inventory') }}" class="nav-link"><i class="fas fa-boxes"></i> Materials</a>
+            </li>
+            {% if current_user.can_manage_users() %}
+            <li class="nav-item">
+                <a href="{{ url_for('add_users') }}" class="nav-link"><i class="fas fa-users-cog"></i> Users</a>
+            </li>
+            {% endif %}
         </ul>
         <div class="logout-wrapper">
             <a href="/logout" class="nav-link" style="color: #ff4d4d;"><i class="fas fa-sign-out-alt"></i> Log Out</a>

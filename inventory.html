@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NetSync - Global Inventory</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #0d0e12; color: #ffffff; display: flex; height: 100vh; overflow: hidden; }
+        .sidebar { width: 260px; background-color: #14151a; border-right: 1px solid #2d2e36; display: flex; flex-direction: column; padding: 20px; flex-shrink: 0; }
+        .brand { display: flex; align-items: center; gap: 15px; font-size: 20px; font-weight: bold; margin-bottom: 40px; color: #fff; text-decoration: none; }
+        .brand-icon { width: 35px; height: 35px; background: linear-gradient(135deg, #7b2cbf, #3a0ca3); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+        .nav-menu { list-style: none; padding: 0; margin: 0; flex-grow: 1; }
+        .nav-item { margin-bottom: 6px; }
+        .nav-link { display: flex; align-items: center; gap: 15px; padding: 12px 15px; color: #8b8d98; text-decoration: none; border-radius: 8px; font-size: 15px; transition: all 0.3s ease; }
+        .nav-link:hover { background-color: #1c1d24; color: #fff; }
+        .nav-link.active { background: linear-gradient(135deg, #7b2cbf, #3a0ca3); color: #fff; font-weight: 500; }
+        .logout-wrapper { margin-top: auto; }
+        .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        .top-header { height: 70px; border-bottom: 1px solid #2d2e36; display: flex; justify-content: space-between; align-items: center; padding: 0 40px; background-color: #14151a; flex-shrink: 0; }
+        .page-title { font-size: 20px; font-weight: 600; margin: 0; }
+        .user-profile { display: flex; align-items: center; gap: 15px; }
+        .avatar { width: 36px; height: 36px; background-color: #2d2e36; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #7b2cbf; }
+        .container { padding: 32px 40px; }
+
+        .card { background-color: #14151a; border: 1px solid #2d2e36; border-radius: 12px; padding: 28px; margin-bottom: 28px; }
+        .card-header { margin-bottom: 20px; border-bottom: 1px solid #2d2e36; padding-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+        .card-header h2 { margin: 0; font-size: 16px; font-weight: 600; }
+        .item-count { background: rgba(123,44,191,0.12); color: #b366ff; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(123,44,191,0.25); }
+
+        /* Tabs */
+        .tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid #2d2e36; padding-bottom: 14px; }
+        .tab-btn { background: none; border: none; color: #8b8d98; font-size: 14px; font-weight: 600; cursor: pointer; padding: 8px 16px; border-radius: 8px; transition: all 0.2s; }
+        .tab-btn:hover { background: #1c1d24; color: #fff; }
+        .tab-btn.active { background: rgba(123,44,191,0.1); color: #b366ff; border: 1px solid rgba(123,44,191,0.3); }
+        .tab-panel { display: none; }
+        .tab-panel.visible { display: block; }
+
+        /* Add form */
+        .form-grid { display: grid; grid-template-columns: 2fr 1.5fr 1fr 1fr auto; gap: 12px; align-items: flex-end; }
+        .form-field { display: flex; flex-direction: column; gap: 6px; }
+        .form-field label { font-size: 12px; color: #8b8d98; font-weight: 500; }
+        .form-input { padding: 11px 14px; background: #0d0e12; border: 1px solid #2d2e36; color: #fff; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s; width: 100%; }
+        .form-input:focus { border-color: #7b2cbf; }
+        .form-select { padding: 11px 14px; background: #0d0e12; border: 1px solid #2d2e36; color: #fff; border-radius: 8px; font-size: 14px; outline: none; width: 100%; }
+        .form-select:focus { border-color: #7b2cbf; }
+        .btn-add { padding: 11px 20px; background: linear-gradient(135deg, #7b2cbf, #3a0ca3); color: #fff; border: none; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; white-space: nowrap; transition: opacity 0.2s; }
+        .btn-add:hover { opacity: 0.9; }
+
+        /* Table */
+        table { width: 100%; border-collapse: collapse; }
+        thead tr { background: #1c1d24; }
+        th { padding: 11px 16px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #8b8d98; border-bottom: 1px solid #2d2e36; }
+        td { padding: 13px 16px; font-size: 14px; color: #e0e0e0; border-bottom: 1px solid #1c1d24; }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: rgba(255,255,255,0.02); }
+        .td-price { color: #b366ff; font-weight: 600; }
+        .td-cat { background: rgba(123,44,191,0.08); color: #b366ff; padding: 3px 9px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+        .td-proj { background: rgba(46,204,113,0.08); color: #2ecc71; padding: 3px 9px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+
+        .btn-del { background: none; border: none; color: #8b8d98; cursor: pointer; padding: 5px 8px; border-radius: 5px; font-size: 14px; transition: all 0.2s; }
+        .btn-del:hover { color: #ff4d4d; background: rgba(255,77,77,0.1); }
+        .btn-edit-inline { background: none; border: none; color: #8b8d98; cursor: pointer; padding: 5px 8px; border-radius: 5px; font-size: 14px; transition: all 0.2s; }
+        .btn-edit-inline:hover { color: #b366ff; background: rgba(123,44,191,0.1); }
+
+        /* Edit modal */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-overlay.open { display: flex; }
+        .modal { background: #14151a; border: 1px solid #2d2e36; border-radius: 14px; width: 560px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
+        .modal-head { padding: 22px 26px 18px; border-bottom: 1px solid #2d2e36; display: flex; justify-content: space-between; align-items: center; }
+        .modal-head h3 { margin: 0; font-size: 17px; }
+        .modal-close { background: none; border: none; color: #8b8d98; font-size: 18px; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: all 0.2s; }
+        .modal-close:hover { background: #2d2e36; color: #fff; }
+        .modal-body { padding: 22px 26px; }
+        .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .modal-foot { padding: 16px 26px; border-top: 1px solid #2d2e36; display: flex; justify-content: flex-end; gap: 10px; }
+        .btn-cancel { padding: 9px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; background: transparent; color: #8b8d98; border: 1px solid #2d2e36; cursor: pointer; transition: all 0.2s; }
+        .btn-cancel:hover { background: #1c1d24; color: #fff; }
+        .btn-save-m { padding: 9px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; background: linear-gradient(135deg, #7b2cbf, #3a0ca3); color: #fff; border: none; cursor: pointer; transition: opacity 0.2s; }
+        .btn-save-m:hover { opacity: 0.9; }
+        .empty-row td { text-align: center; padding: 36px; color: #8b8d98; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <a href="/" class="brand">
+            <div class="brand-icon"><i class="fas fa-network-wired"></i></div>
+            NetSync
+        </a>
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="/" class="nav-link"><i class="fas fa-th-large"></i> Dashboard</a></li>
+            {% if current_user.can_manage_projects() %}
+            <li class="nav-item"><a href="/create-project" class="nav-link"><i class="fas fa-plus-square"></i> New Project</a></li>
+            {% endif %}
+            <li class="nav-item"><a href="{{ url_for('inventory') }}" class="nav-link active"><i class="fas fa-boxes"></i> Materials</a></li>
+            {% if current_user.can_manage_users() %}
+            <li class="nav-item"><a href="{{ url_for('add_users') }}" class="nav-link"><i class="fas fa-users-cog"></i> Users</a></li>
+            {% endif %}
+        </ul>
+        <div class="logout-wrapper">
+            <a href="/logout" class="nav-link" style="color:#ff4d4d;"><i class="fas fa-sign-out-alt"></i> Log Out</a>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal">
+            <div class="modal-head">
+                <h3><i class="fas fa-edit" style="color:#7b2cbf; margin-right:8px;"></i>Edit Inventory Item</h3>
+                <button class="modal-close" onclick="closeEdit()"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="editForm" method="POST">
+                <div class="modal-body">
+                    <div class="modal-grid">
+                        <div class="form-field" style="grid-column:1/-1;">
+                            <label>Item Name</label>
+                            <input type="text" name="item_name" id="edit_item_name" class="form-input" required>
+                        </div>
+                        <div class="form-field">
+                            <label>Category</label>
+                            <input type="text" name="category" id="edit_category" class="form-input" required>
+                        </div>
+                        <div class="form-field">
+                            <label>Unit Label</label>
+                            <input type="text" name="unit_label" id="edit_unit_label" class="form-input">
+                        </div>
+                        <div class="form-field" style="grid-column:1/-1;">
+                            <label>Description</label>
+                            <input type="text" name="description" id="edit_description" class="form-input">
+                        </div>
+                        <div class="form-field">
+                            <label>Unit Price (₱)</label>
+                            <input type="number" name="unit_price" id="edit_unit_price" class="form-input" step="0.01" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-foot">
+                    <button type="button" class="btn-cancel" onclick="closeEdit()">Cancel</button>
+                    <button type="submit" class="btn-save-m"><i class="fas fa-save"></i> Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="top-header">
+            <h1 class="page-title">Global Inventory Management</h1>
+            <div class="user-profile">
+                <span style="font-size:14px; color:#8b8d98;">{{ current_user.username }}</span>
+                <div class="avatar">{{ current_user.username[0]|upper }}</div>
+            </div>
+        </div>
+
+        <div class="container">
+
+            <!-- Add New Item -->
+            <div class="card">
+                <div class="card-header"><h2><i class="fas fa-plus-circle" style="color:#7b2cbf; margin-right:8px;"></i>Add New Material to Catalogue</h2></div>
+                <form action="{{ url_for('inventory') }}" method="POST">
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label>Item Name</label>
+                            <input type="text" name="item_name" class="form-input" placeholder="e.g. Panduit Cat6 Cable" required>
+                        </div>
+                        <div class="form-field">
+                            <label>Category</label>
+                            <input type="text" name="category" class="form-input" placeholder="e.g. CAT6 Cable" required>
+                        </div>
+                        <div class="form-field">
+                            <label>Description</label>
+                            <input type="text" name="description" class="form-input" placeholder="e.g. per 1m">
+                        </div>
+                        <div class="form-field">
+                            <label>Unit Price (₱)</label>
+                            <input type="number" name="unit_price" class="form-input" step="0.01" min="0" placeholder="0.00" required>
+                        </div>
+                        <button type="submit" class="btn-add"><i class="fas fa-plus"></i> Add</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('global',this)"><i class="fas fa-globe" style="margin-right:6px;"></i>Global Catalogue</button>
+                <button class="tab-btn" onclick="switchTab('project',this)"><i class="fas fa-project-diagram" style="margin-right:6px;"></i>Project Materials</button>
+            </div>
+
+            <!-- Tab: Global Catalogue -->
+            <div id="tab-global" class="tab-panel visible">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>System Catalogue</h2>
+                        <span class="item-count">{{ items|length }} item{% if items|length != 1 %}s{% endif %}</span>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item Name</th>
+                                <th>Category</th>
+                                <th>Description</th>
+                                <th>Unit Price</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr>
+                                <td><strong>{{ item.item_name }}</strong></td>
+                                <td><span class="td-cat">{{ item.category }}</span></td>
+                                <td style="color:#8b8d98;">{{ item.description or '—' }}</td>
+                                <td class="td-price">₱{{ "{:,.2f}".format(item.unit_price) }}</td>
+                                <td>
+                                    <button class="btn-edit-inline" title="Edit" onclick="openEdit({{ item.id }}, '{{ item.item_name|replace("'","\\'")|e }}', '{{ item.category|e }}', '{{ item.description or ''|e }}', {{ item.unit_price }}, '{{ item.unit_label|e }}')"><i class="fas fa-pencil-alt"></i></button>
+                                    <form action="{{ url_for('delete_inventory_item', item_id=item.id) }}" method="POST" style="display:inline;">
+                                        <button type="submit" class="btn-del" title="Remove" onclick="return confirm('Remove this item?')"><i class="fas fa-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr class="empty-row"><td colspan="5">No items in the global catalogue yet.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Project Materials -->
+            <div id="tab-project" class="tab-panel">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Materials Used Across Projects</h2>
+                        <span class="item-count">{{ project_materials|length }} entr{% if project_materials|length == 1 %}y{% else %}ies{% endif %}</span>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item Name</th>
+                                <th>Project</th>
+                                <th>Est. Qty</th>
+                                <th>AI Predicted Qty</th>
+                                <th>Unit Price</th>
+                                <th>Est. Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mat in project_materials %}
+                            <tr>
+                                <td><strong>{{ mat.item_name }}</strong></td>
+                                <td><span class="td-proj">{{ mat.project.site_name }}</span></td>
+                                <td>{{ mat.quantity_estimated }}</td>
+                                <td style="color:#7b2cbf; font-weight:600;">{{ "%.2f"|format(mat.ai_prediction) }}</td>
+                                <td class="td-price">₱{{ "{:,.2f}".format(mat.unit_price) }}</td>
+                                <td>₱{{ "{:,.2f}".format(mat.ai_prediction * mat.unit_price) }}</td>
+                            </tr>
+                            {% else %}
+                            <tr class="empty-row"><td colspan="6">No project materials found.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function switchTab(id, btn) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('visible'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + id).classList.add('visible');
+            btn.classList.add('active');
+        }
+
+        function openEdit(id, name, cat, desc, price, unit_label) {
+            document.getElementById('editForm').action = `/inventory/edit/${id}`;
+            document.getElementById('edit_item_name').value = name;
+            document.getElementById('edit_category').value = cat;
+            document.getElementById('edit_description').value = desc;
+            document.getElementById('edit_unit_price').value = price;
+            document.getElementById('edit_unit_label').value = unit_label;
+            document.getElementById('editModal').classList.add('open');
+        }
+        function closeEdit() {
+            document.getElementById('editModal').classList.remove('open');
+        }
+        document.getElementById('editModal').addEventListener('click', function(e) {
+            if (e.target === this) closeEdit();
+        });
+    </script>
+</body>
+</html>

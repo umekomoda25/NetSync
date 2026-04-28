@@ -4,23 +4,30 @@
     <title>NetSync Report - {{ project.site_name }}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f9f9f9; margin: 0; padding: 40px; }
-        .header { background-color: #0a0b1e; color: white; padding: 10px 50px; display: flex; align-items: center; position: fixed; top: 0; left: 0; right: 0; z-index: 1000; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0d0e12; color: #ffffff; margin: 0; padding: 40px; }
+        .header { background-color: #14151a; color: white; padding: 10px 50px; display: flex; align-items: center; position: fixed; top: 0; left: 0; right: 0; z-index: 1000; border-bottom: 1px solid #2d2e36; }
         .brand-container { display: flex; align-items: center; gap: 15px; text-decoration: none; color: white; }
         .system-logo { height: 45px; border-radius: 5px; }
-        .report-paper { background: white; max-width: 900px; margin: 80px auto 0; padding: 50px; border: 1px solid #eee; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
-        .report-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 30px; }
-        .status-stamp { display: inline-block; padding: 10px 20px; border: 3px solid #000; font-weight: bold; text-transform: uppercase; transform: rotate(-5deg); margin: 20px 0; }
+        .report-paper { background: #14151a; max-width: 900px; margin: 80px auto 0; padding: 50px; border: 1px solid #2d2e36; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        .report-header { text-align: center; border-bottom: 2px solid #7b2cbf; padding-bottom: 20px; margin-bottom: 30px; }
+        .report-header h1 { color: #ffffff; margin: 0; }
+        .report-header p { color: #8b8d98; }
+        .status-stamp { display: inline-block; padding: 10px 20px; border: 3px solid #7b2cbf; color: #7b2cbf; font-weight: bold; text-transform: uppercase; transform: rotate(-5deg); margin: 20px 0; }
         table { width: 100%; border-collapse: collapse; margin-top: 30px; }
-        th { background: #f4f4f4; text-align: left; padding: 12px; border-bottom: 2px solid #ddd; }
-        td { padding: 12px; border-bottom: 1px solid #eee; }
+        th { background: #1c1d24; color: #ffffff; text-align: left; padding: 12px; border-bottom: 2px solid #2d2e36; }
+        td { color: #e0e0e0; padding: 12px; border-bottom: 1px solid #2d2e36; }
         .summary-stats { display: flex; justify-content: flex-end; gap: 40px; margin-top: 30px; }
         .stat-box { text-align: right; }
-        .stat-label { font-size: 14px; color: #666; display: block; }
-        .stat-value { font-size: 20px; font-weight: bold; }
-        .btn-download { background: #000; color: white; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; text-decoration: none; margin-right: 10px; }
-        .btn-back { background: #fff; border: 1px solid #ddd; padding: 12px 25px; border-radius: 8px; text-decoration: none; color: #333; font-weight: bold; }
-        @media print { .no-print, .header { display: none; } .report-paper { margin: 0; border: none; box-shadow: none; width: 100%; } }
+        .stat-label { font-size: 14px; color: #8b8d98; display: block; }
+        .stat-value { font-size: 20px; font-weight: bold; color: #ffffff; }
+        .btn-download { background: #7b2cbf; color: white; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; text-decoration: none; margin-right: 10px; transition: opacity 0.3s; }
+        .btn-download:hover { opacity: 0.9; }
+        .btn-back { background: #14151a; border: 1px solid #2d2e36; padding: 12px 25px; border-radius: 8px; text-decoration: none; color: #8b8d98; font-weight: bold; transition: all 0.3s; }
+        .btn-back:hover { color: #ffffff; border-color: #7b2cbf; }
+        h3 { color: #ffffff; }
+        p { color: #e0e0e0; }
+        strong { color: #ffffff; }
+        @media print { .no-print, .header { display: none; } .report-paper { margin: 0; border: none; box-shadow: none; width: 100%; background: white; color: #000; } th { background: #f4f4f4; color: #000; } td { color: #333; } p, h1, h3, strong { color: #000; } }
     </style>
 </head>
 <body>
@@ -35,7 +42,7 @@
     <div class="report-paper">
         <div class="report-header">
             <h1 style="margin:0;">SITE PROJECT REPORT</h1>
-            <p style="color:#666;">Generated on {{ now.strftime('%B %d, %Y') }}</p>
+            <p style="color:#8b8d98;">Generated on {{ now.strftime('%B %d, %Y') }}</p>
         </div>
 
         <div style="display: flex; justify-content: space-between;">
@@ -51,11 +58,6 @@
             </div>
             <div style="text-align: right;">
                 <div class="status-stamp">{{ project.status }}</div>
-                <form action="{{ url_for('complete_project', project_id=project.id) }}" method="POST" class="no-print">
-                    <button type="submit" style="background:none; border:none; color:#5d87ff; cursor:pointer; font-weight:bold;">
-                        {% if project.status == 'Completed' %}Mark as Active{% else %}Mark as Completed{% endif %}
-                    </button>
-                </form>
             </div>
         </div>
 
